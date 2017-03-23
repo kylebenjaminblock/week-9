@@ -71,7 +71,7 @@ Moving your mouse outside of the circle should remove the highlighting.
 
 // Global Variables
 
-var myRectangle;
+var myRectangle = [];
 
 // Initialize Leaflet Draw
 
@@ -94,6 +94,18 @@ map.on('draw:created', function (e) {
     var layer = e.layer; // The Leaflet layer for the shape
     var id = L.stamp(layer); // The unique Leaflet ID for the layer
 
+    //console.log(type,layer, id)
 
+// Remove layer
+    _.each(myRectangle, function(shape){
+      map.removeLayer(shape);
+    });
 
+// Add current layer to map
+    myRectangle.push(layer.addTo(map));
+
+// Add rectangle to sidebar
+var shapeID = "<div id="+id+"><h1>Current ID: "+id+"</h1></div>";
+     $( "#shapes" ).empty();
+     $( "#shapes" ).append(newID);
 });

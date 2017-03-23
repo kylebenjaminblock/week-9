@@ -142,16 +142,21 @@ var updatePosition = function(lat, lng, updated) {
   goToOrigin(lat, lng);
 };
 
+var startPoint;
+var endPoint;
+var optimialRoute;
+
 $(document).ready(function() {
   /* This 'if' check allows us to safely ask for the user's current position */
   if ("geolocation" in navigator) {
     navigator.geolocation.getCurrentPosition(function(position) {
       updatePosition(position.coords.latitude, position.coords.longitude, position.timestamp);
+      startPoint = [position.coords.latitude, position.coords.longitude];
     });
   } else {
     alert("Unable to access geolocation API!");
   }
-
+});
 
   /* Every time a key is lifted while typing in the #dest input, disable
    * the #calculate button if no text is in the input
@@ -168,8 +173,32 @@ $(document).ready(function() {
   $("#calculate").click(function(e) {
     var dest = $('#dest').val();
     console.log(dest);
+    var search = 'https://search.mapzen.com//v1/search?api_key=mapzen-Y4PGRtk&text="+dest+"&size=1';
+
+    // call in search data and prepare for mapping
+    $.ajax(search).done(function(data) {
+    // extract destination coordinates in proper order
+      var endPoint=data.features[0].geometry.coordinates;
+      updatePosition(endPoint[1],endPoint[0]);
+    // define route variable
+      var dataRoute= {
+        "locations": [
+          {"lat":startPoint[1], "lon": startPoint[0]},
+          {"lat":endPoint[1], "lon": endPoint[0]},
+        ],
+        "costing":"auto",
+        "directions_options":{"units":"miles"}
+      };
+      optimialRoute = 'https://matrix.mapzen.com/optimized_route?json='+JSON.stringify(routeJson)+'&api_key=mapzen-Y4PGRtk';
+      $.ajax(optimialRoute).done(function(routing){
+        var routeDecode= decode(routeDecode.trip.legs[0].shape);
+        console.log(routeDecode)
+        // Reverse order of coordinates
+        var finalRoute=_.map(routeDecode, function(d){
+          return ([d[0],d[1]]);
+      });
+
+
+  var theRoute - L.polyline(finalRoute,{color: 'red'})
   });
-
 });
-
-
